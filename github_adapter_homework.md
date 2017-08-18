@@ -2,12 +2,18 @@ Your task is to implement a web-service which exposes some
 of github.com's functionalities to its clients. The functionalities to
 be exposed via a RESTful API are:
 
-  a. given a gihub user, find all users which follows that person and
+  a. given a github user, find all users which follows that person and
   return each of those followers': name, email, location and total
   number of repositories they own.  
+    
+    - https://developer.github.com/v3/users/#get-a-single-user
+    - https://developer.github.com/v3/users/followers/#list-followers-of-a-user
 
   b. given a changeset and a repository, create a pull request 
   and at the same time request the reviews from the given users.
+  
+    - https://developer.github.com/v3/pulls/#create-a-pull-request
+    - https://developer.github.com/v3/pulls/review_requests/#create-a-review-request
 
   c. allow a user to login to github (using their github's
   credentials) then, design and implement a way which will allow this
