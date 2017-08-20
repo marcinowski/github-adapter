@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Github adapter</title>
+        <meta name="author" content="Marcin Muszynski">
+        <link rel="stylesheet" href="static/bootstrap.min.css">
+        <style>
+            div.github-adapter-container {
+                margin-left: 20vw;
+                margin-right: 20vw;
+            }
+        </style>
+        {% block extra_css %}
+        {% endblock %}
+    </head>
+    <body>
+        <div class="github-adapter-container">
+            <img class="github-adapter-logo" src="static/github.gif">
+            <div class="container-fluid">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </div>
+    </body>
+</html>

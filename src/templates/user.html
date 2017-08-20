@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="page-header">User information</h2>
+<form method="POST" action="">
+    {{ form.csrf_token }}
+    <div class="form-group">
+        <label>{{ form.username.label }}</label>
+        {{ form.username }}
+    </div>
+    <input type="submit" class="btn btn-success" value="Get data!">
+</form>
+{% endblock content %}

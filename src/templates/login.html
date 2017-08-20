@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="page-header">Authenticate yourself!</h2>
+<form method="POST" action="/api/login">
+    {{ form.csrf_token }}
+    <div class="form-group">
+        <label>{{ form.username.label }}</label>
+        {{ form.username }}
+    </div>
+    <div class="form-group">
+        <label>{{ form.password.label }}</label>
+        {{ form.password }}
+    </div>
+    <input type="submit" class="btn btn-success" value="Login">
+</form>
+{% endblock content %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+    <style>
+        div.main-content {
+            padding-top: 50px;
+        }
+    </style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="main-content">
+    <div class="col-md-4 col-sm-12">
+        <a href="/login" type="button" class="btn btn-default btn-block">Login</a>
+    </div>
+    <div class="col-md-4 col-sm-12">
+        <a href="/user" type="button" class="btn btn-default btn-block">Users</a>
+    </div>
+    <div class="col-md-4 col-sm-12">
+        <a href="/pull_request" type="button" class="btn btn-default btn-block">Pull request</a>
+    </div>
+</div>
+{% endblock content %}

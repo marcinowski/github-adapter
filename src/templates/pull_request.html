@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="page-header">Create Pull Request</h2>
+<form method="POST" action="">
+    {{ form.csrf_token }}
+    {% for field in form %}
+        {% if not loop.last %}
+            {# last is csfr token, we don't want to display that #}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+            </div>
+        {% endif %}
+    {% endfor %}
+    <input type="submit" class="btn btn-success" value="Create PR!">
+</form>
+{% endblock content %}

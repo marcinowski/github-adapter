@@ -40,3 +40,9 @@ Non-functional requirements:
 
   - consider edge case such as users with a lot of followers
     (e.g. https://github.com/gvanrossum?tab=followers) and design an efficient solution.
+    
+# TODO:
+ - unified gh response handler for catching errors and passing response otherwise
+ - request for paginated queries ..
+ - .. and paginated responses
+ - request with auth
