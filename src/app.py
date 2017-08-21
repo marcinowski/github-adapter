@@ -14,6 +14,7 @@ from flask import Flask, request, session, url_for, render_template, redirect
 
 from src.settings import GITHUB_API_URL
 from src.api import api
+from src.api.auth import Auth
 from src.forms import LoginForm, PullRequestForm, UserForm
 
 app = Flask(__name__)
@@ -28,7 +29,7 @@ def main():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        return redirect('/api/login')  # fixme: this can't be done this way
+        return Auth().post()  # fixme: this can't be done this way
     return render_template('login.html', form=form)
 
 

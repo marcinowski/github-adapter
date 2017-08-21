@@ -3,7 +3,7 @@ of github.com's functionalities to its clients. The functionalities to
 be exposed via a RESTful API are:
 
   a. given a github user, find all users which follows that person and
-  return each of those followers': name, email, location and total
+  return each of those followers: name, email, location and total
   number of repositories they own.  
     
     - https://developer.github.com/v3/users/#get-a-single-user
