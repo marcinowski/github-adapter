@@ -6,6 +6,9 @@
 """
 
 
+RESPONSE_EXCEPTION_NAME_FORMAT = 'GitHubAdapter{}Error'
+
+
 class GitHubAdapterBaseError(Exception):
     """ Base Exception for GitHub adapter"""
 
@@ -28,6 +31,12 @@ class GitHubAdapter401Error(GitHubAdapterHTTPError):
     reason = 'Authentication error'
 
 
+class GitHubAdapter403Error(GitHubAdapterHTTPError):
+    """ Exception to raise when authentication error """
+    status_code = 403
+    reason = 'Access denied'
+
+
 class GitHubAdapter404Error(GitHubAdapterHTTPError):
     """ Exception to raise when resource is not found """
     status_code = 404
@@ -40,6 +49,17 @@ class GitHubAdapter405Error(GitHubAdapterHTTPError):
     reason = 'Method not allowed'
 
 
+class GitHubAdapter422Error(GitHubAdapterHTTPError):
+    """ Exception to raise when method is not allowed """
+    status_code = 422
+    reason = 'Unprocessable Entity - invalid fields received'
+
+
 class GitHubAdapter500Error(GitHubAdapterHTTPError):
     status_code = 500
     reason = 'Server Error'
+
+
+class GitHubAdapter501Error(GitHubAdapterHTTPError):
+    status_code = 501
+    reason = 'Unrecognized Error'

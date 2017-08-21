@@ -9,7 +9,6 @@ import requests
 from flask import session, request, Response
 from flask_restplus import Namespace
 
-from settings import GITHUB_API_URL
 from .generic import GitHubAdapterResource
 from .decorators import catch_http_errors
 from . import exceptions as ex
