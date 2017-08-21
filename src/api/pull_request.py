@@ -19,18 +19,17 @@ api = Namespace('pull_request', description='Pull requests creation operations')
 @api.route('/')
 class PullRequestResource(GitHubAdapterResource):
     """
-    Resource for creating pull requests
+    Resource for creating pull requests and assigning reviewers
     """
     github_endpoint = '/repos/{}/{}/pulls'
-    mandatory_fields = ['repository', 'title', 'head', 'base', 'reviewers']
+    mandatory_fields = ['repository', 'title', 'head', 'base', 'reviewers']  # owner also, but can be stored in session
     optional_fields = ['body']
 
     @catch_http_errors
     def post(self):
         """
-        Pull Request creation resource
-        Method for creating the pull request on selected repository for a given branch and automatically assigning users to
-        review it.
+        Method for creating the pull request on selected repository for a given branch and automatically assigning users
+        to review it.
         This method requires the request data to contain:
             - owner - owner of the repository (unless user is authenticated)
             - repository - name of the repository
@@ -88,7 +87,8 @@ class PullRequestResource(GitHubAdapterResource):
         url = self._get_created_pr_url(pr_data) + '/requested_reviewers'
         return self._post_to_github(url, reviewers)
 
-    def _get_created_pr_url(self, pr_data):
+    @staticmethod
+    def _get_created_pr_url(pr_data):
         """
         Gets url from newly created Pull Request
         :return: url

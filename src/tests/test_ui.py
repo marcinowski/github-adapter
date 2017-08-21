@@ -4,38 +4,41 @@
 :author: Marcin Muszynski
 :contact: marcinowski007@gmail.com
 """
-from unittest.mock import patch
+
 from .generic import GenericTestCase
 
 
 class TestUIEndpoints(GenericTestCase):
+    """
+    Tests below simply check if routing is ok. These tests are copy&paste, but not that many in number so generic
+    approach is not needed. They only need to show if any endpoint fails.
+    """
     def test_main_page(self):
-        """ This test tests if `/` endpoint (main page) returns status 200 """
+        """ This test tests if `/` endpoint (main page) is routed and generated """
         r = self.client.get('/')
         self.assertEqual(r.status_code, 200)
 
-    def test_login(self):
-        """ This test tests if HTTP POST `/login` redirects to API endpoint """
-        data = {'username': 'test', 'password': 'pwd'}
-        with patch.object('api.auth.Auth', 'post') as m:
-            self.client.post('/login', data=data)
-        self.assertTrue(m.called)
+    def test_login_page(self):
+        """ This tests if page for `/login` is routed and generated """
+        r = self.client.get('/login')
+        self.assertEqual(r.status_code, 200)
 
-    def test_create_pull_request(self):
-        data = {
-                'owner': 'test_user',
-                'name': 'test_repository',
-                'title': 'test_pull_request',
-                'head': 'test_branch',
-                'base': 'master',
-                'reviewers': ['test_reviewer', 'test_reviewer_2'],
-                'body': 'This pull request is a test',
-            }
-        with patch.object('api.pull_request.PullRequestResource', 'post') as m:
-            self.client.post('/pull_request', data=data)
-        self.assertTrue(m.called)
+    def test_logout_page(self):
+        """ This tests if page for `/logout` is routed and generated """
+        r = self.client.get('/logout')
+        self.assertEqual(r.status_code, 302)  # this one is redirected straight to API
 
-    def test_get_user_data(self):
-        with patch.object('api.users.UserResource', 'get') as m:
-            self.client.get('/user')
-        self.assertTrue(m.called)
+    def test_user_page(self):
+        """ This tests if page for `/user` is routed and generated """
+        r = self.client.get('/user')
+        self.assertEqual(r.status_code, 200)
+
+    def test_followers_page(self):
+        """ This tests if page for `/follower` is routed and generated """
+        r = self.client.get('/followers')
+        self.assertEqual(r.status_code, 200)
+
+    def test_pull_request_page(self):
+        """ This tests if page for `/pull_request` is routed and generated """
+        r = self.client.get('/pull_request')
+        self.assertEqual(r.status_code, 200)

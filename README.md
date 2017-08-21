@@ -157,6 +157,7 @@ Sometimes one of them is more detailed, which can indicate where has the error o
 API has been wrapped with a simple UI forms for demonstrating purposes. Main endpoints are:
  - `/` - main page
  - `/login` - login page
+ - `/logout` - log out endpoint 
  - `/pull_request` - pull request creation form
  - `/user` - user data fetching form
  - `/followers` - user followers data fetching form

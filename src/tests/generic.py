@@ -4,7 +4,9 @@
 :author: Marcin Muszynski
 :contact: marcinowski007@gmail.com
 """
-from unittest import TestCase, mock
+
+import os
+from unittest import TestCase
 
 from app import app
 
@@ -12,3 +14,10 @@ from app import app
 class GenericTestCase(TestCase):
     def setUp(self):
         self.client = app.test_client()
+        self.app = app
+        app.testing = true
+        app.secret_key = os.urandom(24)
+
+    def tearDown(self):
+        app.testing = False
+        app.secret_key = None
