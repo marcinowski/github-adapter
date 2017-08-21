@@ -5,7 +5,9 @@
 :contact: marcinowski007@gmail.com
 """
 
-from flask import session
+import requests, pdb
+
+from flask import session, request
 from flask_restplus import Resource, Namespace
 
 
@@ -14,7 +16,11 @@ api = Namespace('auth', description='Authentication related operations')
 
 @api.route('/login')
 class Auth(Resource):
+    """
+    Class for handling GitHub users authentication.
+    """
     def post(self):
+        pdb.set_trace()
         login = request.form['username']
         pwd = request.form['password']
         r = requests.get(GITHUB_API_URL + 'user', auth=HTTPBasicAuth(login, pwd))

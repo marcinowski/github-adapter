@@ -5,19 +5,15 @@
 :contact: marcinowski007@gmail.com
 """
 
-import pdb
-
 import os
-import requests
 
-from flask import Flask, request, session, url_for, render_template, redirect
+from flask import Flask, render_template, redirect
 
-from src.settings import GITHUB_API_URL
 from src.api import api
-from src.api.auth import Auth
 from src.forms import LoginForm, PullRequestForm, UserForm
 
 app = Flask(__name__)
+api.init_app(app)
 
 
 @app.route('/', methods=['GET'])
@@ -29,20 +25,20 @@ def main():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        return Auth().post()  # fixme: this can't be done this way
+        return redirect('/api/auth/login', code=307)  # todo: url_for redirection?
     return render_template('login.html', form=form)
 
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    return render_template('main.html')
+    return redirect('/api/auth/logout')
 
 
 @app.route('/pull_request', methods=['GET', 'POST'])
 def pull_request():
     form = PullRequestForm()
     if form.validate_on_submit():
-        return ""
+        return redirect('/api/pull_request', code=307)
     return render_template('pull_request.html', form=form)
 
 
@@ -50,11 +46,8 @@ def pull_request():
 def user():
     form = UserForm()
     if form.validate_on_submit():
-        return ""
+        return redirect('/api/user')
     return render_template('user.html', form=form)
-
-
-api.init_app(app)
 
 
 if __name__ == '__main__':
