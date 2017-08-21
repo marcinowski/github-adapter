@@ -1,13 +1,19 @@
-{% extends 'base.html' %}
+{% extends 'form_base.html' %}
 
-{% block content %}
-<h2 class="page-header">User information</h2>
-<form method="POST" action="">
-    {{ form.csrf_token }}
-    <div class="form-group">
-        <label>{{ form.username.label }}</label>
-        {{ form.username }}
-    </div>
-    <input type="submit" class="btn btn-success" value="Get data!">
-</form>
-{% endblock content %}
+{% block form %}
+    <form method="POST" action="">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            <label>{{ form.username.label }}</label>
+            {{ form.username(class_="form-control") }}
+        </div>
+        <input type="submit" class="btn btn-success" value="Get dem followers!">
+    </form>
+{% endblock form %}
+{% block description %}
+    <p><strong>Check who's following who.</strong><br>
+        By providing the username you can get his followers name, location, email and number of public repos.
+        Note the pagination in API response. Page size is limited to 10 followers because with each follower
+        requires another GitHub request to get the data.
+    </p>
+{% endblock description %}

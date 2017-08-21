@@ -1,18 +1,30 @@
-{% extends 'base.html' %}
+{% extends 'form_base.html' %}
 
-{% block content %}
-<h2 class="page-header">Create Pull Request</h2>
-<form method="POST" action="">
-    {{ form.csrf_token }}
-    {% for field in form %}
-        {% if not loop.last %}
-            {# last is csfr token, we don't want to display that #}
-            <div class="form-group">
-                <label>{{ field.label }}</label>
-                {{ field }}
-            </div>
-        {% endif %}
-    {% endfor %}
-    <input type="submit" class="btn btn-success" value="Create PR!">
-</form>
-{% endblock content %}
+{% block form %}
+    <form method="POST" action="">
+        {{ form.csrf_token }}
+        {% for field in form %}
+            {% if not loop.last %}
+                {# last is csfr token, we don't want to display that #}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field(class_="form-control") }}
+                </div>
+            {% endif %}
+        {% endfor %}
+        <input type="submit" class="btn btn-success" value="Create PR!">
+    </form>
+{% endblock form %}
+
+{% block description %}
+    <p><strong>Create Pull Request!</strong><br>
+        By filling out the form on the left you can create Pull Request and assign reviewers with one shot!<br>
+        Owner is the owner of a repository.<br>
+        Repository is the name of a repository.<br>
+        Head is the name of a branch that you've implemented the changes.<br>
+        Base is the name of a branch that you'd like to merge into.<br>
+        Reviewers are a list of user logins that you'd like to assign the review to.<br>
+        <i>Note that reviewers should be comma-separated without spaces i.e. 'user,user1'.</i><br>
+        PR Body is optional, but you can fill it out to specify what this Pull Request will be about.<br>
+    </p>
+{% endblock description %}

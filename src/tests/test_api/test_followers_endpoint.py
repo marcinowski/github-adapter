@@ -51,7 +51,7 @@ class TestFollowersResourceUnit(GenericTestCase):
         with self.app.test_request_context('?username=test'):
             d = self.resource._single_follower_data('')
             self.assertTrue(isinstance(d, dict))
-            self.assertListEqual(sorted(['name', 'email', 'public_repos', 'location']), sorted(list(d.keys())))
+            self.assertListEqual(sorted(['name', 'email', 'public_repos', 'location', 'login']), sorted(list(d.keys())))
 
 
 def mock_resource_error(url, *args):

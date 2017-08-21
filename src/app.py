@@ -7,7 +7,7 @@
 
 import os
 
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect
 
 from api import api
 from forms import LoginForm, PullRequestForm, UserForm
@@ -25,7 +25,7 @@ def main():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        return redirect('/api/auth/login', code=307)  # todo: url_for redirection?
+        return redirect('/api/auth/login', code=307)
     return render_template('login.html', form=form)
 
 
@@ -46,7 +46,8 @@ def pull_request():
 def user():
     form = UserForm()
     if form.validate_on_submit():
-        return redirect('/api/user')  # fixme: POST -> GET
+        username = form.data['username']
+        return redirect('/api/user?username={}'.format(username))
     return render_template('user.html', form=form)
 
 
@@ -54,7 +55,8 @@ def user():
 def followers():
     form = UserForm()
     if form.validate_on_submit():
-        return redirect('/api/user/followers')  # fixme: POST -> GET
+        username = form.data['username']
+        return redirect('/api/user/followers?username={}'.format(username))
     return render_template('user.html', form=form)
 
 

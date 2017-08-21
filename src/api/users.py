@@ -96,7 +96,7 @@ class FollowersResource(UserResource):
     @staticmethod
     def _parse_single_follower_data(data):
         """ Cutting off not necessary keys, as indicated by specification """
-        expected_keys = ['name', 'location', 'email', 'public_repos']
+        expected_keys = ['name', 'location', 'email', 'public_repos', 'login']
         return {k: v for k, v in data.items() if k in expected_keys}
 
     def _get_pagination_attrs_from_request(self):

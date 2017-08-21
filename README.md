@@ -113,8 +113,9 @@ More specific documentation is included under `127.0.0.1:5000/api` endpoint.
 
 ### Authenticated user:
 Methods described below simply assume default `username`, methods above with explicit `username` are still valid.
-Let's explore authenticating the user using `Session` from python `request` library as we need a session object to keep the user
-authenticated, `curl` wouldn't work here, unless keeping the session open.
+Let's explore authenticating the user using `Session` from python `request` library as we need a session object to
+keep the user authenticated, `curl` wouldn't work here, unless keeping the session open. 
+Browsing this API also ensures keeping the session.
 
 To log in:
 
@@ -202,5 +203,17 @@ Alternatively you can use `setup.cmd` or `setup.sh` commands in the project root
 It should work when run from the directory it's located in.
 
 ## <a name="tests"></a> Tests
+
 There are over 40 tests written in this project. To be fair, they're not the best quality (not DRY, not too many,
-lack of verbose unit/functional separation). To run the tests run `pytest` from project root directory.
+lack of verbose unit/functional separation). 
+
+To run the tests run `pytest` from project root directory.
+
+To test API manually you can do for example:
+
+**Testing session authentication:**
+ 1. `/api/user` - 400 Bad Request
+ 2. `/login` - pass your credentials with neat form
+ 3. `/api/user` - 200 OK - user authenticated
+ 4. `/api/logout` - Logging out
+ 5. `/api/user` - 400 Bad Request

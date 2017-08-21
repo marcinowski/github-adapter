@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="container-fluid">
+        <div class="col-md-6 col-sm-12">
+            {% block form %}
+            {% endblock form %}
+        </div>
+        <div class="col-md-6 col-sm-12">
+            {% block description %}
+            {% endblock description %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
