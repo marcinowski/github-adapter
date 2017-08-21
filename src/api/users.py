@@ -60,7 +60,7 @@ class FollowersResource(UserResource):
     default_pagination_param = {'per_page': default_page_size}
 
     def _get_data_for_user(self, username):
-        """ Gathers data for all followers of seleted user """
+        """ Gathers data for all followers of selected user """
         url = self._get_url(username)
         followers_resp, f_status_code = self._fetch_from_github(url, paginated=True)
         return self._get_followers_data(followers_resp), f_status_code
