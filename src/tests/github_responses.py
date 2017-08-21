@@ -5,6 +5,11 @@
 :contact: marcinowski007@gmail.com
 """
 
+PAGINATION_LINK_HEADER = '<https://api.github.com/...?page=3>; rel="next",' \
+                         ' <https://api.github.com/...?page=119>; rel="last",' \
+                         ' <https://api.github.com/...?page=1>; rel="first",' \
+                         ' <https://api.github.com/...?page=1>; rel="prev"'
+
 USER_STATUS = 200
 USER_RESPONSE = {
   "login": "octocat",
@@ -234,7 +239,7 @@ PULL_REQUEST_RESPONSE = {
       "teams_url": "http://api.github.com/repos/octocat/Hello-World/teams",
       "trees_url": "http://api.github.com/repos/octocat/Hello-World/git/trees{/sha}",
       "homepage": "https://github.com",
-      "language": null,
+      "language": None,
       "forks_count": 9,
       "stargazers_count": 80,
       "watchers_count": 80,
@@ -359,7 +364,7 @@ PULL_REQUEST_RESPONSE = {
       "teams_url": "http://api.github.com/repos/octocat/Hello-World/teams",
       "trees_url": "http://api.github.com/repos/octocat/Hello-World/git/trees{/sha}",
       "homepage": "https://github.com",
-      "language": null,
+      "language": None,
       "forks_count": 9,
       "stargazers_count": 80,
       "watchers_count": 80,

@@ -4,7 +4,7 @@
 :author: Marcin Muszynski
 :contact: marcinowski007@gmail.com
 """
-from .generics import GenericTestCase
+from .generic import GenericTestCase
 
 from api.decorators import catch_http_errors, _get_flask_response
 from api.exceptions import GitHubAdapterHTTPError

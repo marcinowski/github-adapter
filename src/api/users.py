@@ -30,19 +30,18 @@ class UserResource(GitHubAdapterResource):
             HTTP GET '../api/user'
         :return: List of users followers in json format
         :rtype: Response
-        :raises: # todo
         """
-        username = request.args.get('username', None)
-        if not username:
-            if session.get('authenticated', False):
-                username = session.get('username')
-            else:
-                raise ex.GitHubAdapter400Error
-        data = self._get_data_for_user(username)
-        return data.json(), 200
+        if 'username' in request.args:
+            username = request.args.get('username')
+        elif session.get('authenticated', False):
+            username = session.get('username')
+        else:
+            raise ex.GitHubAdapter400Error('Authenticate user or specify it by ?username=<username>')
+        return self._get_data_for_user(username)
 
     def _get_data_for_user(self, username):
-        return self.nauth_github_endpoint
+        url = self.GITHUB_API_URL + self.github_endpoint.format(username)
+        pass
 
     def _get_followers(self, username):
         data = requests.get(self.github_ref.format(username) + '/followers')  # fixme: this response must be paginated

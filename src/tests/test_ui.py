@@ -5,7 +5,7 @@
 :contact: marcinowski007@gmail.com
 """
 from unittest.mock import patch
-from .generics import GenericTestCase
+from .generic import GenericTestCase
 
 
 class TestUIEndpoints(GenericTestCase):
