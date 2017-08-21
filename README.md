@@ -26,7 +26,7 @@ Github adapter API uses the following endpoints:
   - `/api/user[?username=<username>]` - for user's data
   - `/api/pull_request` - for creating pull requests
 
-All responses are returned in `json` format, some of them are paginated (see *pagination* section).
+All responses are returned in `json` format, some of them are paginated (see [pagination](#pagination)).
 ### Non authenticated user
 
 Let's explore the functionalites for non authenticated users with `curl` command alongside with python `requests` library.
@@ -48,24 +48,29 @@ results in the following response:
       "prev_url": <url/None>,
       "next_url": <url/None>,
       "last_url": <url/None>,
-      "data: {
-        "name": "Test User",
-        "location": "Sydney",
-        "email": null,
-        "public_repos": 12,
-      },
-      {
-        "name": "Test User2",
-        "location": "Sydney",
-        "email": testuser2@test.com,
-        "public_repos": 31,
-      }
+      "data: [
+        {
+          "name": "Test User",
+          "location": "Sydney",
+          "email": null,
+          "public_repos": 12,
+          "login": "testuser"
+        },
+        {
+          "name": "Test User2",
+          "location": "Sydney",
+          "email": testuser2@test.com,
+          "public_repos": 31,
+          "login": "testuser"
+        }
+      ]
     }
 
-#### Pagination
+#### <a name="pagination"></a> Pagination
 Above response is an example of a paginated response. Note the `first/prev/next/last` urls,
 they're responsible for paginated continuity of API. Depending on API endpoint
-you can manipulate page size by `?per_page=...` parameter.
+you can manipulate page size by `?per_page=...` parameter (for `/followers` 10 is forced, because of a long waiting time
+for the resource, please see the implementation in src.api.users.py:FollowerResource)
 
 #### User data
 Endpoint for fetching user data (name, location, email)
@@ -82,6 +87,8 @@ Response:
         "location": "Sydney",
         "email": null,
         "public_repos": 12,
+        "login": octocat
+        ...
       }
     }
 
@@ -105,11 +112,14 @@ For the pull request endpoint, executing:
 results in:
 
     {
-      "Status": "201 Created"
-      "Location: https://api.github.com/repos/test_user/test_repository/pulls/1
+      "data": {
+        ... GitHubResponse .. 
+      }
     }
     
-More specific documentation is included under `127.0.0.1:5000/api` endpoint.
+where GitHubResponse [as here](https://developer.github.com/v3/pulls/review_requests/#response)
+
+More specific documentation is included under `127.0.0.1:5000/api` endpoint and in code docs.
 
 ### Authenticated user:
 Methods described below simply assume default `username`, methods above with explicit `username` are still valid.
@@ -126,8 +136,12 @@ To log in:
 this returns:
     
     {
-      "Status": "200 Authenticated"
+      "data": {
+        ...GitHubUserData...
+      }
     }
+
+where GitHubUserData [as here](https://developer.github.com/v3/users/#response)
 
 #### Users endpoint
 
@@ -143,7 +157,7 @@ Similarly:
 
     s.post('http://127.0.0.1:5000/api/pull_request', data=data)
     
-doesn't require providing `username` in data, as it's assumed.
+doesn't require providing `username` in data, as it's assumed (however you can still 'overwrite' that parameter).
 
 To log out:
     
@@ -188,8 +202,14 @@ as it's a simple project to show designing simple API's and sharing the project 
 tokens for each setup or sharing a private token which is certainly a bad idea. For a stand-alone usage of this project
 OAuth could easily be implemented using `oauthlib` or `request-oauthlib` libraries.
 
+### Highlights
+ - exception/response handling with `catch_http_error` decorator
+ - paginated followers response
+ - definitely logo
+
 ## <a name="setup"></a> Project setup
-System requirements: Python > 3 (not tested on 2.* versions)
+System requirements: Python > 3 (not tested on 2.* versions).
+If you work in a closed internal network, make sure you set `http_proxy` & `https_proxy` in environment variables.
 
 To setup the project it's recommended to use virtualenv, but it can be skipped.
  1. `git clone https://github.com/marcinowski/github-adapter`
@@ -198,17 +218,18 @@ To setup the project it's recommended to use virtualenv, but it can be skipped.
  4. `python src/app.py` # starts local server on port 5000 which is now accesible in your browser under `127.0.0.1:5000`
  
 Alternatively you can use `setup.cmd` or `setup.sh` commands in the project root after fetching the repository.
-(it's assumed that `python`, `pip` and `virtualenv` executables are added to your system path)
+(scripts assume that `python`, `pip` and `virtualenv` executables are added to your system path) Scripts can take about 
+couple of minutes (3 minutes max I guess), depending on your internet connection and hardware.
 
 **Note** I don't have my Linux environment set up and I'm using Windows so Linux setup script isn't properly tested.
 It should work when run from the directory it's located in.
 
 ## <a name="tests"></a> Tests
 
-There are over 40 tests written in this project. To be fair, they're not the best quality (not DRY, not too many,
+There are over 40 tests written in this project. To be fair, they need more time to develop (not very DRY, not too many,
 lack of verbose unit/functional separation). 
 
-To run the tests run `pytest` from project root directory.
+To run the tests activate `virtualenv` if you use one and run `pytest` from project root directory.
 
 To check PEP8 run `pytest --pep8`.
 
