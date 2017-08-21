@@ -171,6 +171,7 @@ API has been wrapped with a simple UI forms for demonstrating purposes. Main end
  - `/user` - user data fetching form
  - `/followers` - user followers data fetching form
 
+If you're authenticated, most forms will automatically fill out your name, which naturally you can change.
 All above endpoints redirect to it's bound API endpoints returning pure `json` response.
 
 ## <a name="tech"></a> Technicalities

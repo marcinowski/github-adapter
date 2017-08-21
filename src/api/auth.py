@@ -62,6 +62,7 @@ class AuthLogin(GitHubAdapterResource):
 @api.route('/logout')
 class AuthLogout(GitHubAdapterResource):
     """ Simple class for removing auth data from session """
+
     @catch_http_errors
     def get(self):
         """

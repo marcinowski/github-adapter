@@ -11,9 +11,8 @@
     </form>
 {% endblock form %}
 {% block description %}
-    <p><strong>Check who's following who.</strong><br>
-        By providing the username you can get his followers name, location, email and number of public repos.
-        Note the pagination in API response. Page size is limited to 10 followers because with each follower
-        requires another GitHub request to get the data.
+    <p><strong>Check user information.</strong><br>
+        By providing the username you can get all information about user. If you're authenticted, your username should
+        appear automatically in 'Username' input.
     </p>
 {% endblock description %}
