@@ -210,6 +210,8 @@ lack of verbose unit/functional separation).
 
 To run the tests run `pytest` from project root directory.
 
+To check PEP8 run `pytest --pep8`.
+
 To test API manually you can do for example:
 
 **Testing session authentication:**
