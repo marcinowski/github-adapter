@@ -15,7 +15,7 @@ class GenericTestCase(TestCase):
     def setUp(self):
         self.client = app.test_client()
         self.app = app
-        app.testing = true
+        app.testing = True
         app.secret_key = os.urandom(24)
 
     def tearDown(self):

@@ -116,7 +116,7 @@ class GitHubAdapterResource(Resource):
         "Main" private method for building params for request
         :rtype: dict
         """
-        params = {}
+        params = self.default_pagination_param
         params.update(self._get_pagination_attrs_from_request())
         params.update(self._get_query_params_from_request())
         return params

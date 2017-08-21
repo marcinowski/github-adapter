@@ -5,8 +5,8 @@
 :contact: marcinowski007@gmail.com
 """
 
-from .generic import GenericTestCase
-from .github_responses import PAGINATION_LINK_HEADER
+from ..generic import GenericTestCase
+from ..github_responses import PAGINATION_LINK_HEADER
 from api.github_utils import GitHubUtils
 
 
