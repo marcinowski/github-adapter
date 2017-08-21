@@ -116,8 +116,17 @@ All above endpoints redirect to it's bound API endpoints returning pure `json` r
 
 ## Technicalities
 
+### Stack
 Project uses `flask` framework along with `flask-RESTPlus` for API side. It's designed for GitHub REST API v3 
-(https://developer.github.com/v3/).
+(https://developer.github.com/v3/). 
+
+### Authentication
+For authentication HTTPBasicAuth is used and after successful authentication 
+credentials are stored inside `flask` session object and user is authenticated with each request. Flask session
+object is not shared outside of the application. OAuth is not used
+as it's a simple project to show designing simple API's and sharing the project would require generating individual OAuth 
+tokens for each setup or sharing a private token which is certainly a bad idea. For a stand-alone usage of this project
+OAuth could easily be implemented using `oauthlib` or `request-oauthlib` libraries.
 
 ## Project setup
 System requirements: Python > 3 (not tested on 2.* versions)
@@ -128,7 +137,10 @@ To setup the project it's recommended to use virtualenv, but it can be skipped.
  3. `pip install -r requirements.txt`
  4. `python src/app.py` # starts local server on port 5000 which is now accesible in your browser under `127.0.0.1:5000`
  
-Alternatively you can use `setup.cmd` or `setup.sh` commands in the project root
+Alternatively you can use `setup.cmd` or `setup.sh` commands in the project root after fetching the repository.
+(it's assumed that `python`, `pip` and `virtualenv` executables are added to your system path)
+**Note** I don't have my Linux environment set up and I'm using Windows so Linux setup script isn't properly tested.
+It should work when run from the directory it's located in.
 
 ## Tests
 To run tests run `pytest`
