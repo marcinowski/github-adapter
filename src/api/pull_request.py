@@ -23,7 +23,7 @@ class PullRequestResource(GitHubAdapterResource):
     """
     github_endpoint = '/repos/{}/{}/pulls'
     mandatory_fields = ['repository', 'title', 'head', 'base', 'reviewers']  # owner also, but can be stored in session
-    optional_fields = ['body']
+    optional_fields = ['body', 'owner']
 
     @catch_http_errors
     def post(self):
@@ -36,7 +36,7 @@ class PullRequestResource(GitHubAdapterResource):
             - title - title of the pull request
             - head - name of the branch to be merged where changes are implemented
             - base - name of the branch to be merged into
-            - reviewers - list of reviewers logins
+            - reviewers - comma separated string of reviewers logins
             - body (optional) - content of pull request message (default is provided)
         Example of data body:
 
@@ -46,14 +46,14 @@ class PullRequestResource(GitHubAdapterResource):
                 'title': 'test_pull_request',
                 'head': 'test_branch',
                 'base': 'master',
-                'reviewers': ['test_reviewer', 'test_reviewer_2'],
+                'reviewers': 'test_reviewer,test_reviewer_2',
                 'body': 'This pull request is a test',
             }
         """
         pr_data, reviewers = self._validate_data()
         url = self._get_url(pr_data['owner'], pr_data['repository'])
         response, _ = self._post_to_github(url, pr_data)
-        resp, status_code = self._add_reviewers(response, reviewers)
+        resp, status_code = self._add_reviewers(response['data'], reviewers)
         return resp, status_code
 
     def _get_url(self, username, repo):
@@ -76,16 +76,25 @@ class PullRequestResource(GitHubAdapterResource):
                                                'the repository in HTTP POST body or be authenticated')
             data['owner'] = session.get('username')
         reviewers = data.pop('reviewers')
+        self._validate_reviewers(reviewers)
         return data, reviewers
+
+    @staticmethod
+    def _validate_reviewers(revs):
+        """ Reviewers should not contain spaces """
+        if ' ' in revs:
+            raise ex.GitHubAdapter400Error("Reviewers should be ','"
+                                           " comma separated only without spaces i.e. 'login1,login2'")
 
     def _copy_request_form(self):
         """ Copies request.form with only necessary keys """
-        return {k: v for k, v in request.form if k in self.mandatory_fields + self.optional_fields}
+        return {k: v for k, v in request.form.items() if k in self.mandatory_fields + self.optional_fields}
 
     def _add_reviewers(self, pr_data, reviewers):
         """ Simply posts list of reviewers to new endpoint """
         url = self._get_created_pr_url(pr_data) + '/requested_reviewers'
-        return self._post_to_github(url, reviewers)
+        rev_list = reviewers.split(',')
+        return self._post_to_github(url, rev_list)
 
     @staticmethod
     def _get_created_pr_url(pr_data):

@@ -9,7 +9,6 @@ from flask import session
 from unittest.mock import MagicMock
 
 from api.auth import AuthLogin, AuthLogout
-from api import exceptions as ex
 from ..generic import GenericTestCase
 from ..github_responses import AUTH_RESPONSE, AUTH_STATUS, ERROR_RESPONSE_401
 

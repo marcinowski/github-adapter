@@ -86,7 +86,7 @@ For the pull request endpoint, executing:
       'title': 'test_pull_request',
       'head': 'test_branch',
       'base': 'master',
-      'reviewers': ['test_reviewer', 'test_reviewer_2'],
+      'reviewers': 'test_reviewer,test_reviewer_2',
       'body': 'This pull request is a test',
     }
     
