@@ -1,13 +1,21 @@
 # Github adapter
 
-## What is it?
+## Table of contents:
+ - What is it? [#](#base)
+ - How to use API? [#](#api)
+ - How to use API with simple UI? [#](#ui)
+ - Technicalities [#](#tech)
+ - Project Setup [#](#setup)
+ - Tests [#](#tests)
+
+## <a name="base"></a> What is it?
 This web application provides proxy API for some of the GitHub functionalities as well as a simple UI for explaining
 the usage of API. Main functionalities are:
  - fetching data about logged in user or any other user from GitHub along with its followers
  - creating Pull Requests along with automatic reviewers assignment
  - basic user authentication simplifying above operations to selected user
 
-## How to use API?
+## <a name="api"></a> How to use API?
 Let's explore the pure API side.
 
 Github adapter API uses the following endpoints:
@@ -152,7 +160,7 @@ Errors in json format come in format:
 `detail_reason` shows an error message from GitHub API, `reason` shows GitHub Adapter error message.
 Sometimes one of them is more detailed, which can indicate where has the error occured.
 
-## How to use API with simple UI?
+## <a name="ui"></a> How to use API with simple UI?
 
 API has been wrapped with a simple UI forms for demonstrating purposes. Main endpoints are:
  - `/` - main page
@@ -164,7 +172,7 @@ API has been wrapped with a simple UI forms for demonstrating purposes. Main end
 
 All above endpoints redirect to it's bound API endpoints returning pure `json` response.
 
-## Technicalities
+## <a name="tech"></a> Technicalities
 
 ### Stack
 Project uses `flask` framework along with `flask-RESTPlus` for API side. It's designed for GitHub REST API v3 
@@ -178,7 +186,7 @@ as it's a simple project to show designing simple API's and sharing the project 
 tokens for each setup or sharing a private token which is certainly a bad idea. For a stand-alone usage of this project
 OAuth could easily be implemented using `oauthlib` or `request-oauthlib` libraries.
 
-## Project setup
+## <a name="setup"></a> Project setup
 System requirements: Python > 3 (not tested on 2.* versions)
 
 To setup the project it's recommended to use virtualenv, but it can be skipped.
@@ -193,5 +201,6 @@ Alternatively you can use `setup.cmd` or `setup.sh` commands in the project root
 **Note** I don't have my Linux environment set up and I'm using Windows so Linux setup script isn't properly tested.
 It should work when run from the directory it's located in.
 
-## Tests
-To run tests run `pytest` from project root directory.
+## <a name="tests"></a> Tests
+There are over 40 tests written in this project. To be fair, they're not the best quality (not DRY, not too many,
+lack of verbose unit/functional separation). To run the tests run `pytest` from project root directory.
