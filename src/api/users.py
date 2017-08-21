@@ -4,21 +4,21 @@
 :author: Marcin Muszynski
 :contact: marcinowski007@gmail.com
 """
-import requests
 
 from flask import session, request, Response
 from flask_restplus import Namespace
 
+from . import exceptions as ex
 from .generic import GitHubAdapterResource
 from .decorators import catch_http_errors
-from . import exceptions as ex
 
 api = Namespace('user', description='User related operations')
 
 
 @api.route('/')
 class UserResource(GitHubAdapterResource):
-    github_endpoint = '/users/{}/followers'
+    github_endpoint = '/users/{}'
+    query_parameters = ['username', ]
 
     @catch_http_errors
     def get(self):
@@ -40,14 +40,27 @@ class UserResource(GitHubAdapterResource):
         return self._get_data_for_user(username)
 
     def _get_data_for_user(self, username):
-        url = self.GITHUB_API_URL + self.github_endpoint.format(username)
-        pass
+        url = self._get_url(username)
+        rest_response = self._fetch_from_github(url)
+        return rest_response
 
-    def _get_followers(self, username):
-        data = requests.get(self.github_ref.format(username) + '/followers')  # fixme: this response must be paginated
-        urls = [v['url'] for v in data.json()]
-        response = []
-        for user_url in urls:
-            d = requests.get(user_url)
-            response.append(d.json())
-        return response
+    def _get_url(self, username):
+        return self.GITHUB_API_URL + self.github_endpoint.format(username)
+
+
+@api.route('/followers')
+class FollowersResource(UserResource):
+    github_endpoint = '/users/{}/followers'
+    pagination_parameters = ['page', 'per_page']
+    default_pagination_param = {'per_page': 10}
+
+    def _get_data_for_user(self, username):
+        url = self.GITHUB_API_URL + self.github_endpoint.format(username) + '?' + self._build_get_params()
+        followers, f_status_code = self._fetch_from_github(url, paginated=True)
+        return followers, f_status_code
+
+    def _get_pagination_attrs_from_request(self):
+        """ This method is overwritten to enforce per_page=10, higher values are too heavy"""
+        pags = super()._get_pagination_attrs_from_request()
+        pags['per_page'] = 10
+        return pags

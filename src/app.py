@@ -46,7 +46,15 @@ def pull_request():
 def user():
     form = UserForm()
     if form.validate_on_submit():
-        return redirect('/api/user')
+        return redirect('/api/user')  # fixme: POST -> GET
+    return render_template('user.html', form=form)
+
+
+@app.route('/followers', methods=['GET', 'POST'])
+def followers():
+    form = UserForm()
+    if form.validate_on_submit():
+        return redirect('/api/user/followers')  # fixme: POST -> GET
     return render_template('user.html', form=form)
 
 

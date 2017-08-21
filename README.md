@@ -14,7 +14,8 @@ Github adapter API uses the following endpoints:
   - `/api` - full API documentation
   - `/api/login` - for user authentication
   - `/api/logout` - for logging out
-  - `/api/user[?username=<username>]` - for user data fetching
+  - `/api/user/followers[?username=<username>]` - for user's followers data fetching
+  - `/api/user[?username=<username>]` - for user's data
   - `/api/pull_request` - for creating pull requests
 
 All responses are returned in `json` format, some of them are paginated (see *pagination* section).
@@ -24,16 +25,22 @@ Let's explore the functionalites for non authenticated users with `curl` command
  
 **Note** in examples below it's assumed that you run the app on `127.0.0.1:5000` or `localhost:5000`. Change the domain accordingly to your needs. 
 
+#### User endpoints
+
 Executing:
   
-    curl http://127.0.0.1:5000/api/user?username=octocat
+    curl http://127.0.0.1:5000/api/user/followers?username=octocat
     or
-    requests.get('http://127.0.0.1:5000/api/user?username=octocat
+    requests.get('http://127.0.0.1:5000/api/user/followers?username=octocat
     
 results in the following response:
     
-    [
-      {
+    { 
+      "first_url": <url/None>,
+      "prev_url": <url/None>,
+      "next_url": <url/None>,
+      "last_url": <url/None>,
+      "data: {
         "name": "Test User",
         "location": "Sydney",
         "email": null,
@@ -45,9 +52,32 @@ results in the following response:
         "email": testuser2@test.com,
         "public_repos": 31,
       }
-    ]
-#### TODO: Pagination
+    }
 
+#### Pagination
+Above response is an example of a paginated response. Note the `first/prev/next/last` urls,
+they're responsible for paginated continuity of API. Depending on API endpoint
+you can manipulate page size by `?per_page=...` parameter.
+
+#### User data
+Endpoint for fetching user data (name, location, email)
+
+    curl http://127.0.0.1:5000/api/user?username=octocat
+    or
+    requests.get('http://127.0.0.1:5000/api/user?username=octocat
+
+Response:
+
+    {
+      "data": {
+        "name": "Test User",
+        "location": "Sydney",
+        "email": null,
+        "public_repos": 12,
+      }
+    }
+
+#### Pull request
 For the pull request endpoint, executing:
     
     data = {
@@ -59,6 +89,7 @@ For the pull request endpoint, executing:
       'reviewers': ['test_reviewer', 'test_reviewer_2'],
       'body': 'This pull request is a test',
     }
+    
     curl -d $data http://127.0.0.1:5000/api/pull_request
     or
     requests.get('http://127.0.0.1:5000/api/pull_request', data=data)
@@ -89,11 +120,15 @@ this returns:
       "Status": "200 Authenticated"
     }
 
+#### Users endpoint
+
 Now, using the same session object we can:
     
-    s.get('http://127.0.0.1:5000/api/user')
+    s.get('http://127.0.0.1:5000/api/user/followers')
     
 which returns followers for authenticated user in the same format as above.
+
+#### Pull request
 
 Similarly:
 
@@ -105,6 +140,18 @@ To log out:
     
     s.get('http://127.0.0.1:5000/api/logout')
 
+### Error handling
+Errors in json format come in format:
+
+    {
+      "detail_reason": "Not Found",
+      "reason": "Page not found",
+      "status_code": 404
+    }
+
+`detail_reason` shows an error message from GitHub API, `reason` shows GitHub Adapter error message.
+Sometimes one of them is more detailed, which can indicate where has the error occured.
+
 ## How to use API with simple UI?
 
 API has been wrapped with a simple UI forms for demonstrating purposes. Main endpoints are:
@@ -112,6 +159,7 @@ API has been wrapped with a simple UI forms for demonstrating purposes. Main end
  - `/login` - login page
  - `/pull_request` - pull request creation form
  - `/user` - user data fetching form
+ - `/followers` - user followers data fetching form
 
 All above endpoints redirect to it's bound API endpoints returning pure `json` response.
 
@@ -145,4 +193,4 @@ Alternatively you can use `setup.cmd` or `setup.sh` commands in the project root
 It should work when run from the directory it's located in.
 
 ## Tests
-To run tests run `pytest`
+To run tests run `pytest` from project root directory.

@@ -8,7 +8,6 @@
 import requests
 
 from collections import OrderedDict
-from copy import deepcopy
 from flask import session, request
 from flask_restplus import Resource
 from requests.auth import HTTPBasicAuth
@@ -21,16 +20,24 @@ from .github_utils import GitHubUtils
 class GitHubAdapterResource(Resource):
     """
         This is a generic class for all Resources used in GitHub Adapter API endpoints. It contains
-        private methods that are supposed to be used in main public "get/post" methods.
-        Parameters:
-            GITHUB_API_URL - it's a main Github API endpoint, shouldn't be overwritten
-            github_endpoint - path to use for specific query for this resource
-            pagination_parameters - available get params for this API endpoint at GitHub
-            default_pagination_param - pagination wouldn't show up if default params are not specified
+        only private methods that are supposed to be used in main public "get/post" methods.
+
+        :var GITHUB_API_URL: - it's a main Github API endpoint, shouldn't be overwritten
+        :var github_endpoint: - path to use for specific query for this resource
+        :var pagination_parameters: - available get params for this API endpoint at GitHub
+        :var default_pagination_param: - pagination wouldn't show up if default params are not specified
+
+        To build a proper resource URL:
+            1. Combine self.GITHUB_API_URL and self.github_endpoint
+            2. Format url above with some parts of path if necessary
+            3. in case of GET request add GET params using self._get_build_params
+        then you can `self._fetch_from_github` or `self._post_to_github` providing urls.
     """
     GITHUB_API_URL = 'https://api.github.com'
+
     github_endpoint = ''
     pagination_parameters = []
+    query_parameters = []
     default_pagination_param = {}
 
     def _fetch_from_github(self, url, paginated=False):
@@ -82,15 +89,39 @@ class GitHubAdapterResource(Resource):
             return self._handle_error_response(response)
         return self._handle_non_paginated_response(response)
 
-    def _get_pagination_attrs_from_request(self):
-        """ Main method for fetching page_size, page etc. from request. They must be attached to the url """
-        return {k: v for k, v in request.attrs.items() if k in self.pagination_parameters}
+    def _build_get_params(self):
+        """
+        "Main" private method for converting to GET Params
+        :rtype: str
+        """
+        params = self._get_valid_params_from_request()
+        return urlencode(params)
 
-    def _define_get_params(self, **kwargs):
-        """ Main method for converting to GET Params """
-        query = deepcopy(self.default_pagination_param)
-        query.update(kwargs)
-        return urlencode(query)
+    def _get_url(self, *args, **kwargs):
+        """ Main method to be extended in child classes for getting url """
+        raise NotImplementedError
+
+    ###################
+    # PRIVATE METHODS #
+    ###################
+
+    def _get_valid_params_from_request(self):
+        """
+        "Main" private method for building params for request
+        :rtype: dict
+        """
+        params = {}
+        params.update(self._get_pagination_attrs_from_request())
+        params.update(self._get_query_params_from_request())
+        return params
+
+    def _get_pagination_attrs_from_request(self):
+        """ Private method for fetching pagination params from request. They must be attached to the url """
+        return {k: v for k, v in request.args.items() if k in self.pagination_parameters}
+
+    def _get_query_params_from_request(self):
+        """ Private method for fetching query params from request. They must be attached to the url """
+        return {k: v for k, v in request.args.items() if k in self.query_parameters}
 
     @staticmethod
     def _requests_get(url, auth):
@@ -110,10 +141,11 @@ class GitHubAdapterResource(Resource):
             return HTTPBasicAuth(username, password)
         return None
 
-    def _handle_non_paginated_response(self, response):
+    @staticmethod
+    def _handle_non_paginated_response(response):
         """ Simple non paginated response handling """
         data = response.json()
-        return self._format_rest_response(data), response.status_code
+        return {'data': data}, response.status_code
 
     def _handle_paginated_response(self, response):
         """ Paginated response handling along with pagination info """
@@ -121,8 +153,7 @@ class GitHubAdapterResource(Resource):
         urls = self._get_pagination_attributes(response)
         return self._format_rest_response(data, *urls), response.status_code
 
-    @staticmethod
-    def _get_pagination_attributes(response):
+    def _get_pagination_attributes(self, response):
         """
             This method extracts urls to
                 - first_page
@@ -133,7 +164,7 @@ class GitHubAdapterResource(Resource):
         """
         gh_pag = response.headers.get('Link')
         if gh_pag:
-            return GitHubUtils.extract_pagination_urls(gh_pag)
+            return GitHubUtils.extract_pagination_urls(gh_pag, self.api.url_for(self))
         return (None, )*4
 
     @staticmethod
@@ -142,13 +173,14 @@ class GitHubAdapterResource(Resource):
             Method that raises proper response error.
             Exception gets caught by decorator over main `get/post` function.
         """
-        status_code = response
+        status_code = response.status_code
         reason = response.reason or ''
         exception = getattr(ex, ex.RESPONSE_EXCEPTION_NAME_FORMAT.format(status_code), ex.GitHubAdapter501Error)
         raise exception(reason)
 
     @staticmethod
     def _format_rest_response(data, first_url=None, next_url=None, previous_url=None, last_url=None):
+        """ Formats data using unified template """
         template = OrderedDict([
             ('first_url', first_url),
             ('previous_url', previous_url),

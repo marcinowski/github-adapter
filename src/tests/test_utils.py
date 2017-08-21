@@ -15,12 +15,12 @@ class TestUtils(GenericTestCase):
         """ Test for proper Link Header parsing """
         link = PAGINATION_LINK_HEADER
         expected = (
-            'https://api.github.com/...?page=1',
-            'https://api.github.com/...?page=1',
-            'https://api.github.com/...?page=3',
-            'https://api.github.com/...?page=119',
+            'https://api.github.com/?page=1',
+            'https://api.github.com/?page=1',
+            'https://api.github.com/?page=3',
+            'https://api.github.com/?page=119',
         )
-        self.assertTupleEqual(GitHubUtils.extract_pagination_urls(link), expected)
+        self.assertTupleEqual(GitHubUtils.extract_pagination_urls(link, 'https://api.github.com/'), expected)
 
     def test_incomplete_urls_extraction(self):
         """ In this test non existing keys are checked to be returned as None """
@@ -28,7 +28,7 @@ class TestUtils(GenericTestCase):
         expected = (
             None,
             None,
-            'https://api.github.com/...?page=3',
-            'https://api.github.com/...?page=119',
+            'https://api.github.com/?page=3',
+            'https://api.github.com/?page=119',
         )
-        self.assertTupleEqual(GitHubUtils.extract_pagination_urls(link), expected)
+        self.assertTupleEqual(GitHubUtils.extract_pagination_urls(link, 'https://api.github.com/'), expected)
