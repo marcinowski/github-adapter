@@ -5,20 +5,21 @@
 :contact: marcinowski007@gmail.com
 """
 
-from flask import session
-from flask_restplus import Resource, Namespace
+from flask import request
+from flask_restplus import Namespace
 
-from settings import GITHUB_API_URL
+from .generic import GitHubAdapterResource
+
 
 api = Namespace('pull_request', description='Pull requests creation operations')
 
 
 @api.route('/')
-class PullRequestResource(Resource):
+class PullRequestResource(GitHubAdapterResource):
     """
     Test
     """
-    github_ref = GITHUB_API_URL + '/repos/{owner}/{repo}/pulls'
+    github_endpoint = '/repos/{}/{}/pulls'
 
     def post(self):
         """
@@ -51,3 +52,6 @@ class PullRequestResource(Resource):
         # process data - extract id
         # post data {reviewers: [..]} to github_ref + '/{id}/requested_reviewers
         return {'test': 'test'}, 201
+
+    def _get_url(self, username, repo):
+        return self.GITHUB_API_URL + self.github_endpoint.format(username, repo)
