@@ -101,6 +101,12 @@ class GitHubAdapterResource(Resource):
         """ Main method to be extended in child classes for getting url """
         raise NotImplementedError
 
+    def _is_authenticated(self):
+        """ Checks if user is authenticated """
+        if 'authenticated' in session:
+            return session['authenticated']
+        return False
+
     ###################
     # PRIVATE METHODS #
     ###################
@@ -133,10 +139,9 @@ class GitHubAdapterResource(Resource):
         """ Method excluded for easier testing """
         return requests.post(url, json=data, auth=auth)
 
-    @staticmethod
-    def _get_session_auth():
+    def _get_session_auth(self):
         """ Extracts user credentials from flask session object """
-        if session.get('authenticated', None):
+        if self._is_authenticated():
             username, password = session.get('username'), session.get('password')
             return HTTPBasicAuth(username, password)
         return None

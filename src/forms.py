@@ -17,7 +17,7 @@ class LoginForm(FlaskForm):
 
 class PullRequestForm(FlaskForm):
     owner = StringField('Owner', validators=[DataRequired()], description='Owner of the repository')
-    repo = StringField('Repository', validators=[DataRequired()], description='Repository name')
+    repository = StringField('Repository', validators=[DataRequired()], description='Repository name')
     title = StringField('PR Title', validators=[DataRequired()], description='Pull request title')
     head = StringField('Head', validators=[DataRequired()], description='Branch where changes were applied')
     base = StringField('Base', validators=[DataRequired()], description='Branch to merge the changes into')

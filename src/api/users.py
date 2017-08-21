@@ -34,7 +34,7 @@ class UserResource(GitHubAdapterResource):
         """
         if 'username' in request.args:
             username = request.args.get('username')
-        elif session.get('authenticated', False):
+        elif self._is_authenticated():
             username = session.get('username')
         else:
             raise ex.GitHubAdapter400Error('Authenticate user or specify it by ?username=<username>')

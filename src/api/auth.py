@@ -33,7 +33,7 @@ class AuthLogin(GitHubAdapterResource):
         url = self._get_url()
         response, status_code = self._fetch_from_github(url)
         if status_code == 200:  # user authenticated
-            if not session('authenticated', False):
+            if not self._is_authenticated():
                 session['authenticated'] = True
                 session['username'], session['password'] = self._get_credentials_from_request()
         else:
@@ -45,18 +45,17 @@ class AuthLogin(GitHubAdapterResource):
 
     def _get_session_auth(self):
         """ Overwriting to get credentials from authentication form """
-        if session.get('authenticated', False):
+        if self._is_authenticated():
             return super()._get_session_auth()
         return HTTPBasicAuth(*self._get_credentials_from_request())
 
     @staticmethod
     def _get_credentials_from_request():
         """ Fetches credentials from POST data """
-        try:
-            username = request.form['username']
-            password = request.form['password']
-        except KeyError:
+        if 'username' not in request.form or 'password' not in request.form:
             raise ex.GitHubAdapter400Error('Missing parameters. Username and password are mandatory.')
+        username = request.form['username']
+        password = request.form['password']
         return username, password
 
 
@@ -70,7 +69,7 @@ class AuthLogout(GitHubAdapterResource):
         :return: response data, status code
         :rtype: tuple
         """
-        if session.get('authenticated', False):
+        if self._is_authenticated():
             session['authenticated'] = False
             session.pop('username', None)
             session.pop('password', None)
