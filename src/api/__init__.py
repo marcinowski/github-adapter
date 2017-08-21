@@ -6,9 +6,9 @@
 """
 from flask_restplus import Api
 
-from src.api.users import api as users
-from src.api.pullrequest import api as pr
-from src.api.auth import api as auth
+from api.users import api as users
+from api.pull_request import api as pr
+from api.auth import api as auth
 
 
 api = Api(

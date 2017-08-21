@@ -4,32 +4,46 @@
 :author: Marcin Muszynski
 :contact: marcinowski007@gmail.com
 """
+import requests
 
-from flask import session
-from flask_restplus import Resource, Namespace
+from flask import session, request, Response
+from flask_restplus import Namespace
 
-from src.settings import GITHUB_API_URL
+from settings import GITHUB_API_URL
+from .generic import GitHubAdapterResource
+from .decorators import catch_http_errors
+from . import exceptions as ex
 
 api = Namespace('user', description='User related operations')
 
 
 @api.route('/')
-class UserResource(Resource):
-    github_ref = GITHUB_API_URL + 'users/'
+class UserResource(GitHubAdapterResource):
+    github_endpoint = '/users/{}/followers'
 
-    def get(self, username=None):
+    @catch_http_errors
+    def get(self):
         """
-        User data resource
-        :param username:
-        :return:
+        User data resource. Returns all it's followers paginated (see documentation).
+        Usage
+            HTTP GET '../api/user?username=<username>'
+            or if user is authenticated and wants to fetch his data:
+            HTTP GET '../api/user'
+        :return: List of users followers in json format
+        :rtype: Response
+        :raises: # todo
         """
-        if session.get('authenticated', False):
-            data = requests.get(self.github_ref.format(session['login']))
-            return data.json(), 200
-        else:
-            username = request.args.get('username', None)
-            if not username:
-                return {}, 40
+        username = request.args.get('username', None)
+        if not username:
+            if session.get('authenticated', False):
+                username = session.get('username')
+            else:
+                raise ex.GitHubAdapter400Error
+        data = self._get_data_for_user(username)
+        return data.json(), 200
+
+    def _get_data_for_user(self, username):
+        return self.nauth_github_endpoint
 
     def _get_followers(self, username):
         data = requests.get(self.github_ref.format(username) + '/followers')  # fixme: this response must be paginated

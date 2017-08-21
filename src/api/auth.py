@@ -5,7 +5,7 @@
 :contact: marcinowski007@gmail.com
 """
 
-import requests, pdb
+import requests
 
 from flask import session, request
 from flask_restplus import Resource, Namespace
@@ -20,7 +20,6 @@ class Auth(Resource):
     Class for handling GitHub users authentication.
     """
     def post(self):
-        pdb.set_trace()
         login = request.form['username']
         pwd = request.form['password']
         r = requests.get(GITHUB_API_URL + 'user', auth=HTTPBasicAuth(login, pwd))

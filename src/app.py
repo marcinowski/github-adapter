@@ -9,8 +9,8 @@ import os
 
 from flask import Flask, render_template, redirect
 
-from src.api import api
-from src.forms import LoginForm, PullRequestForm, UserForm
+from api import api
+from forms import LoginForm, PullRequestForm, UserForm
 
 app = Flask(__name__)
 api.init_app(app)

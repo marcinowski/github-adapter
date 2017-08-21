@@ -4,9 +4,12 @@
 :author: Marcin Muszynski
 :contact: marcinowski007@gmail.com
 """
-from flask_restplus import Namespace, Resource, fields
+from flask_restplus import Resource
 
 
-api = Namespace('cats', description='Cats related operations')
+class GitHubAdapterResource(Resource):
+    GITHUB_API_URL = 'https://api.github.com'
+    github_endpoint = ''
 
-api
+    def _handle_paginated_response(self):
+        pass

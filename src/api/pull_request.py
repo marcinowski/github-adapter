@@ -8,7 +8,7 @@
 from flask import session
 from flask_restplus import Resource, Namespace
 
-from src.settings import GITHUB_API_URL
+from settings import GITHUB_API_URL
 
 api = Namespace('pull_request', description='Pull requests creation operations')
 
