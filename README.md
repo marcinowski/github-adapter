@@ -1,7 +1,7 @@
 # Github adapter
 
 ## What is it?
-This web application provides proxy API to shortcut some of the GitHub functionalities as well as a simple UI for explaining
+This web application provides proxy API for some of the GitHub functionalities as well as a simple UI for explaining
 the usage of API. Main functionalities are:
  - fetching data about logged in user or any other user from GitHub along with its followers
  - creating Pull Requests along with automatic reviewers assignment
@@ -11,7 +11,7 @@ the usage of API. Main functionalities are:
 Let's explore the pure API side.
 
 Github adapter API uses the following endpoints:
-  - `/api` - full API documentation, simple UI
+  - `/api` - full API documentation
   - `/api/login` - for user authentication
   - `/api/logout` - for logging out
   - `/api/user[?username=<username>]` - for user data fetching
@@ -20,8 +20,9 @@ Github adapter API uses the following endpoints:
 All responses are returned in `json` format, some of them are paginated (see *pagination* section).
 ### Non authenticated user
 
-Let's explore the functionalites for non authenticated users with `curl` command alongside with python `requests` library. 
-**Note** in examples below it's assumed that you run this on `127.0.0.1:5000` or `localhost:5000`. Change the domain accordingly to your needs. 
+Let's explore the functionalites for non authenticated users with `curl` command alongside with python `requests` library.
+ 
+**Note** in examples below it's assumed that you run the app on `127.0.0.1:5000` or `localhost:5000`. Change the domain accordingly to your needs. 
 
 Executing:
   
@@ -139,6 +140,7 @@ To setup the project it's recommended to use virtualenv, but it can be skipped.
  
 Alternatively you can use `setup.cmd` or `setup.sh` commands in the project root after fetching the repository.
 (it's assumed that `python`, `pip` and `virtualenv` executables are added to your system path)
+
 **Note** I don't have my Linux environment set up and I'm using Windows so Linux setup script isn't properly tested.
 It should work when run from the directory it's located in.
 
