@@ -10,7 +10,7 @@ from flask import session, request, Response
 from flask_restplus import Namespace, Resource
 
 from . import exceptions as ex
-from .generic import GitHubAdapterMixin
+from .generic import GitHubAdapterMixin, AsyncGitHubAdapterMixin
 from .decorators import catch_http_errors
 
 api = Namespace('user', description='User related operations')
@@ -52,7 +52,7 @@ class UserResource(Resource, GitHubAdapterMixin):
 
 
 @api.route('/followers')
-class FollowersResource(UserResource):
+class FollowersResource(UserResource, AsyncGitHubAdapterMixin):
     """ Note! This class inherits after UserResource, since the `get` method implementations are the same. """
     github_endpoint = '/users/{}/followers'
     pagination_parameters = ['page', 'per_page']
@@ -80,17 +80,19 @@ class FollowersResource(UserResource):
         """
         old_data = followers.pop('data')
         urls = [k.get('url', '') for k in old_data]
-        data = [self._single_follower_data(url) for url in urls]
-        followers['data'] = data
+        data = self.fetch_many_from_github(urls)
+        parsed_data = self._parse_followers_data(data)
+        followers['data'] = parsed_data
         return followers
 
-    def _single_follower_data(self, url):
+    def _parse_followers_data(self, data):
         """ Fetching and parsing single follower """
-        try:
-            response, status_code = self.fetch_from_github(url)
-        except ex.GitHubAdapterHTTPError as e:
-            return "{} HTTP error for fetching data from {}. Reason {}.".format(e.status_code, url, e.reason)
-        p_data = self._parse_single_follower_data(response['data'])
+        p_data = []
+        for resp, status in data:
+            if status > 400:
+                p_data.append("{} HTTP error for fetching data. Reason {}.".format(status, resp))
+            else:
+                p_data.append(self._parse_single_follower_data(resp))
         return p_data
 
     @staticmethod

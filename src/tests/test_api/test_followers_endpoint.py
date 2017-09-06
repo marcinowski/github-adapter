@@ -40,7 +40,7 @@ class TestFollowersResourceUnit(GenericTestCase):
         mock.return_value = MockUserErrorResponse()
         self.resource._requests_get = mock
         with self.app.test_request_context('?username=test'):
-            d = self.resource._single_follower_data('')
+            d = self.resource._parse_followers_data('')
             self.assertTrue(isinstance(d, str))
 
     def test_get_ok_followers_data(self):
@@ -49,7 +49,7 @@ class TestFollowersResourceUnit(GenericTestCase):
         mock.return_value = MockUserResponse()
         self.resource._requests_get = mock
         with self.app.test_request_context('?username=test'):
-            d = self.resource._single_follower_data('')
+            d = self.resource._parse_followers_data('')
             self.assertTrue(isinstance(d, dict))
             self.assertListEqual(sorted(['name', 'email', 'public_repos', 'location', 'login']), sorted(list(d.keys())))
 
