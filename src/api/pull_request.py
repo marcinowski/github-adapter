@@ -6,18 +6,18 @@
 """
 
 from flask import session, request
-from flask_restplus import Namespace
+from flask_restplus import Namespace, Resource
 
 from . import exceptions as ex
 from .decorators import catch_http_errors
-from .generic import GitHubAdapterResource
+from .generic import GitHubAdapterMixin
 
 
 api = Namespace('pull_request', description='Pull requests creation operations')
 
 
 @api.route('/')
-class PullRequestResource(GitHubAdapterResource):
+class PullRequestResource(Resource, GitHubAdapterMixin):
     """
     Resource for creating pull requests and assigning reviewers
     """
@@ -51,12 +51,12 @@ class PullRequestResource(GitHubAdapterResource):
             }
         """
         pr_data, reviewers = self._validate_data()
-        url = self._get_url(pr_data['owner'], pr_data['repository'])
-        response, _ = self._post_to_github(url, pr_data)
+        url = self.get_url(pr_data['owner'], pr_data['repository'])
+        response, _ = self.post_to_github(url, pr_data)
         resp, status_code = self._add_reviewers(response['data'], reviewers)
         return resp, status_code
 
-    def _get_url(self, username, repo):
+    def get_url(self, username, repo):
         return self.GITHUB_API_URL + self.github_endpoint.format(username, repo)
 
     def _validate_data(self):
@@ -71,7 +71,7 @@ class PullRequestResource(GitHubAdapterResource):
                 raise ex.GitHubAdapter400Error('{} missing from data'.format(key))
         data = self._copy_request_form()
         if 'owner' not in data:
-            if not self._is_authenticated():
+            if not self.is_authenticated():
                 raise ex.GitHubAdapter400Error('You must either provide owner of '
                                                'the repository in HTTP POST body or be authenticated')
             data['owner'] = session.get('username')
@@ -94,7 +94,7 @@ class PullRequestResource(GitHubAdapterResource):
         """ Simply posts list of reviewers to new endpoint """
         url = self._get_created_pr_url(pr_data) + '/requested_reviewers'
         rev_list = reviewers.split(',')
-        return self._post_to_github(url, rev_list)
+        return self.post_to_github(url, rev_list)
 
     @staticmethod
     def _get_created_pr_url(pr_data):

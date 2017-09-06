@@ -25,10 +25,10 @@ class TestAuthResource(GenericTestCase):
         a = AuthLogin()
         mock = MagicMock()
         mock.return_value = AUTH_RESPONSE, AUTH_STATUS
-        a._fetch_from_github = mock
+        a.fetch_from_github = mock
         with self.app.test_request_context('/', data={'username': 't_username', 'password': 'test'}):
             a.post()
-            self.assertTrue(a._is_authenticated())
+            self.assertTrue(a.is_authenticated())
             self.assertEqual(session['username'], 't_username')
 
     def test_nok_response(self):
@@ -36,7 +36,7 @@ class TestAuthResource(GenericTestCase):
         a = AuthLogin()
         mock = MagicMock()
         mock.return_value = ERROR_RESPONSE_401, 401
-        a._fetch_from_github = mock
+        a.fetch_from_github = mock
         resp, status_code = a.post()
         self.assertEqual(status_code, 401)
 
@@ -46,5 +46,5 @@ class TestAuthResource(GenericTestCase):
         with self.app.test_request_context('/'):
             session['authenticated'] = True
             a.get()
-            self.assertFalse(a._is_authenticated())
+            self.assertFalse(a.is_authenticated())
             self.assertFalse('username' in session)

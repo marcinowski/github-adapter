@@ -7,17 +7,17 @@
 
 from collections import OrderedDict
 from flask import session, request, Response
-from flask_restplus import Namespace
+from flask_restplus import Namespace, Resource
 
 from . import exceptions as ex
-from .generic import GitHubAdapterResource
+from .generic import GitHubAdapterMixin
 from .decorators import catch_http_errors
 
 api = Namespace('user', description='User related operations')
 
 
 @api.route('/')
-class UserResource(GitHubAdapterResource):
+class UserResource(Resource, GitHubAdapterMixin):
     github_endpoint = '/users/{}'
     query_parameters = ['username', ]
 
@@ -34,7 +34,7 @@ class UserResource(GitHubAdapterResource):
         """
         if 'username' in request.args:
             username = request.args.get('username')
-        elif self._is_authenticated():
+        elif self.is_authenticated():
             username = session.get('username')
         else:
             raise ex.GitHubAdapter400Error('Authenticate user or specify it by ?username=<username>')
@@ -42,11 +42,11 @@ class UserResource(GitHubAdapterResource):
 
     def _get_data_for_user(self, username):
         """ Fetches data for specified username """
-        url = self._get_url(username)
-        rest_response = self._fetch_from_github(url)
+        url = self.get_url(username)
+        rest_response = self.fetch_from_github(url)
         return rest_response
 
-    def _get_url(self, username):
+    def get_url(self, username):
         """ Build url for user endpoint in GitHub """
         return self.GITHUB_API_URL + self.github_endpoint.format(username)
 
@@ -61,13 +61,13 @@ class FollowersResource(UserResource):
 
     def _get_data_for_user(self, username):
         """ Gathers data for all followers of selected user """
-        url = self._get_url(username)
-        followers_resp, f_status_code = self._fetch_from_github(url, paginated=True)
+        url = self.get_url(username)
+        followers_resp, f_status_code = self.fetch_from_github(url, paginated=True)
         return self._get_followers_data(followers_resp), f_status_code
 
-    def _get_url(self, username):
+    def get_url(self, username):
         """ BUild url for followers endpoint on GitHub """
-        return self.GITHUB_API_URL + self.github_endpoint.format(username) + '?' + self._build_get_params()
+        return self.GITHUB_API_URL + self.github_endpoint.format(username) + '?' + self.build_get_params()
 
     def _get_followers_data(self, followers):
         """
@@ -87,7 +87,7 @@ class FollowersResource(UserResource):
     def _single_follower_data(self, url):
         """ Fetching and parsing single follower """
         try:
-            response, status_code = self._fetch_from_github(url)
+            response, status_code = self.fetch_from_github(url)
         except ex.GitHubAdapterHTTPError as e:
             return "{} HTTP error for fetching data from {}. Reason {}.".format(e.status_code, url, e.reason)
         p_data = self._parse_single_follower_data(response['data'])

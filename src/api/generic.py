@@ -17,10 +17,10 @@ from . import exceptions as ex
 from .github_utils import GitHubUtils
 
 
-class GitHubAdapterResource(Resource):
+class GitHubAdapterMixin(object):
     """
-        This is a generic class for all Resources used in GitHub Adapter API endpoints. It contains
-        only private methods that are supposed to be used in main public "get/post" methods.
+        This is a generic mixin class for all Resources used in GitHub Adapter API endpoints. It contains
+        methods that are supposed to be used in public Resource "get/post" methods.
 
         :var GITHUB_API_URL: - it's a main Github API endpoint, shouldn't be overwritten
         :var github_endpoint: - path to use for specific query for this resource
@@ -31,7 +31,7 @@ class GitHubAdapterResource(Resource):
             1. Combine self.GITHUB_API_URL and self.github_endpoint
             2. Format url above with some parts of path if necessary
             3. in case of GET request add GET params using self._get_build_params
-        then you can `self._fetch_from_github` or `self._post_to_github` providing urls.
+        then you can `self.fetch_from_github` or `self.post_to_github` providing urls.
     """
     GITHUB_API_URL = 'https://api.github.com'
 
@@ -40,9 +40,9 @@ class GitHubAdapterResource(Resource):
     query_parameters = []
     default_pagination_param = {}
 
-    def _fetch_from_github(self, url, paginated=False):
+    def fetch_from_github(self, url, paginated=False):
         """
-        "Main" private method for fetching data from given resource. This is a private method, because it's supposed to
+        Main method for fetching data from given resource. It's supposed to
         be used under decorated "get" methods specified in routed Resources.
         This method handles GitHub response, authentication, pagination for HTTP GET request. It uses `requests` library
         underneath for HTTPBasicAuth and HTTP requests.
@@ -65,9 +65,9 @@ class GitHubAdapterResource(Resource):
             return self._handle_paginated_response(response)
         return self._handle_non_paginated_response(response)
 
-    def _post_to_github(self, url, data):
+    def post_to_github(self, url, data):
         """
-        "Main" private method for posting data to given resource. This is a private method, because it's supposed to
+        Main method for posting data to given resource. It's supposed to
         be used under decorated "post" methods specified in routed Resources.
         This method handles GitHub response, authentication for HTTP POST request. It uses `requests` library
         underneath for HTTPBasicAuth and HTTP requests.
@@ -89,27 +89,23 @@ class GitHubAdapterResource(Resource):
             return self._handle_error_response(response)
         return self._handle_non_paginated_response(response)
 
-    def _build_get_params(self):
+    def build_get_params(self):
         """
-        "Main" private method for converting to GET Params
+        Main method for converting to GET Params
         :rtype: str
         """
         params = self._get_valid_params_from_request()
         return urlencode(params)
 
-    def _get_url(self, *args, **kwargs):
+    def get_url(self, *args, **kwargs):
         """ Main method to be extended in child classes for getting url """
         raise NotImplementedError
 
-    def _is_authenticated(self):
+    def is_authenticated(self):
         """ Checks if user is authenticated """
         if 'authenticated' in session:
             return session['authenticated']
         return False
-
-    ###################
-    # PRIVATE METHODS #
-    ###################
 
     def _get_valid_params_from_request(self):
         """
@@ -141,7 +137,7 @@ class GitHubAdapterResource(Resource):
 
     def _get_session_auth(self):
         """ Extracts user credentials from flask session object """
-        if self._is_authenticated():
+        if self.is_authenticated():
             username, password = session.get('username'), session.get('password')
             return HTTPBasicAuth(username, password)
         return None

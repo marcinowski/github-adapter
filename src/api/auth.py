@@ -5,18 +5,18 @@
 :contact: marcinowski007@gmail.com
 """
 from flask import session, request
-from flask_restplus import Namespace
+from flask_restplus import Namespace, Resource
 from requests.auth import HTTPBasicAuth
 
 from . import exceptions as ex
 from .decorators import catch_http_errors
-from .generic import GitHubAdapterResource
+from .generic import GitHubAdapterMixin
 
 api = Namespace('auth', description='Authentication related operations')
 
 
 @api.route('/login')
-class AuthLogin(GitHubAdapterResource):
+class AuthLogin(Resource, GitHubAdapterMixin):
     """
     Resource for handling GitHub users authentication.
     """
@@ -30,22 +30,22 @@ class AuthLogin(GitHubAdapterResource):
         :return: response data, status code
         :rtype: tuple
         """
-        url = self._get_url()
-        response, status_code = self._fetch_from_github(url)
+        url = self.get_url()
+        response, status_code = self.fetch_from_github(url)
         if status_code == 200:  # user authenticated
-            if not self._is_authenticated():
+            if not self.is_authenticated():
                 session['authenticated'] = True
                 session['username'], session['password'] = self._get_credentials_from_request()
         else:
             raise ex.GitHubAdapter401Error('Wrong username and password combination.')
         return response, status_code
 
-    def _get_url(self):
+    def get_url(self):
         return self.GITHUB_API_URL + self.github_endpoint
 
     def _get_session_auth(self):
         """ Overwriting to get credentials from authentication form """
-        if self._is_authenticated():
+        if self.is_authenticated():
             return super()._get_session_auth()
         return HTTPBasicAuth(*self._get_credentials_from_request())
 
@@ -60,7 +60,7 @@ class AuthLogin(GitHubAdapterResource):
 
 
 @api.route('/logout')
-class AuthLogout(GitHubAdapterResource):
+class AuthLogout(Resource, GitHubAdapterMixin):
     """ Simple class for removing auth data from session """
 
     @catch_http_errors
@@ -70,12 +70,12 @@ class AuthLogout(GitHubAdapterResource):
         :return: response data, status code
         :rtype: tuple
         """
-        if self._is_authenticated():
+        if self.is_authenticated():
             session['authenticated'] = False
             session.pop('username', None)
             session.pop('password', None)
         return {'data': 'Logging out successful'}, 200
 
-    def _get_url(self):
+    def get_url(self):
         """ Overwriting to implement all parent methods """
         return ''

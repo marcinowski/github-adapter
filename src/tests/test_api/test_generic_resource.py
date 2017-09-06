@@ -9,7 +9,7 @@ from flask import session
 
 from ..generic import GenericTestCase
 from api import exceptions as ex
-from api.generic import GitHubAdapterResource
+from api.generic import GitHubAdapterMixin
 
 
 class TestGenericAPIResource(GenericTestCase):
@@ -22,16 +22,16 @@ class TestGenericAPIResource(GenericTestCase):
     def test_authenticated_session(self):
         with self.app.test_request_context('/'):
             session['authenticated'] = True
-            self.assertTrue(MockResource()._is_authenticated())
+            self.assertTrue(MockResource().is_authenticated())
 
     def test_not_authenticated_session(self):
         with self.app.test_request_context('/'):
-            self.assertFalse(MockResource()._is_authenticated())
+            self.assertFalse(MockResource().is_authenticated())
 
     def test_fetch_from_github_ok_npag(self):
         """ This tests ok response, not paginated"""
         with self.app.test_request_context('/'):
-            resp, status_code = MockResource()._fetch_from_github('/')
+            resp, status_code = MockResource().fetch_from_github('/')
             expected_resp = {
                 "data": ''
             }
@@ -41,7 +41,7 @@ class TestGenericAPIResource(GenericTestCase):
     def test_fetch_from_github_ok_pag(self):
         """ This tests ok response, paginated"""
         with self.app.test_request_context('/'):
-            resp, _ = MockResource()._fetch_from_github('/', paginated=True)
+            resp, _ = MockResource().fetch_from_github('/', paginated=True)
             expected_resp = {
                 "first_url": None,
                 "previous_url": None,
@@ -55,7 +55,7 @@ class TestGenericAPIResource(GenericTestCase):
         """ This tests ok response, paginated"""
         with self.app.test_request_context('/'):
             with self.assertRaises(ex.GitHubAdapter400Error):
-                resp, _ = MockResource()._post_to_github('/', data=None)
+                resp, _ = MockResource().post_to_github('/', data=None)
 
 
 class MockResponse(object):
@@ -76,12 +76,12 @@ class MockErrorResponse(MockResponse):
     status_code = 400
 
 
-class MockResource(GitHubAdapterResource):
+class MockResource(GitHubAdapterMixin):
     pagination_parameters = ['page', 'per_page']
     query_parameters = ['test', ]
     default_pagination_param = {'per_page': 10}
 
-    def _get_url(self, *args, **kwargs):
+    def get_url(self, *args, **kwargs):
         pass
 
     @staticmethod
