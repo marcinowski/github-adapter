@@ -39,6 +39,7 @@ class GitHubAdapterMixin(object):
     pagination_parameters = []
     query_parameters = []
     default_pagination_param = {}
+    max_page_size = None
 
     def fetch_from_github(self, url, paginated=False):
         """
@@ -119,7 +120,10 @@ class GitHubAdapterMixin(object):
 
     def _get_pagination_attrs_from_request(self):
         """ Private method for fetching pagination params from request. They must be attached to the url """
-        return {k: v for k, v in request.args.items() if k in self.pagination_parameters}
+        pags = {k: v for k, v in request.args.items() if k in self.pagination_parameters}
+        if pags.get('per_page', None) and self.max_page_size and int(pags['per_page']) > self.max_page_size:
+            pags['per_page'] = self.max_page_size
+        return pags
 
     def _get_query_params_from_request(self):
         """ Private method for fetching query params from request. They must be attached to the url """
