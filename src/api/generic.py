@@ -4,12 +4,12 @@
 :author: Marcin Muszynski
 :contact: marcinowski007@gmail.com
 """
-
+import asyncio
+import aiohttp
 import requests
 
 from collections import OrderedDict
 from flask import session, request
-from flask_restplus import Resource
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlencode
 
@@ -39,6 +39,7 @@ class GitHubAdapterMixin(object):
     pagination_parameters = []
     query_parameters = []
     default_pagination_param = {}
+    max_page_size = None
 
     def fetch_from_github(self, url, paginated=False):
         """
@@ -119,7 +120,10 @@ class GitHubAdapterMixin(object):
 
     def _get_pagination_attrs_from_request(self):
         """ Private method for fetching pagination params from request. They must be attached to the url """
-        return {k: v for k, v in request.args.items() if k in self.pagination_parameters}
+        pags = {k: v for k, v in request.args.items() if k in self.pagination_parameters}
+        if pags.get('per_page', None) and self.max_page_size and int(pags['per_page']) > self.max_page_size:
+            pags['per_page'] = self.max_page_size
+        return pags
 
     def _get_query_params_from_request(self):
         """ Private method for fetching query params from request. They must be attached to the url """
@@ -190,3 +194,30 @@ class GitHubAdapterMixin(object):
             ('data', data)
         ])
         return template
+
+
+class AsyncGitHubAdapterMixin(object):
+    """
+    Mixin basing on GitHubAdapterMixin but allowing to fetch data with Python 3.4 < async module.
+    Uses aiohttp instead of requests.
+    Note! This method can only be used for non paginated resources from GitHub.
+    """
+    def fetch_many_from_github(self, urls):
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(self._fetch_many_from_github(urls, loop))
+
+    async def _fetch_many_from_github(self, urls, loop):
+        auth = self._get_session_auth()
+        async with aiohttp.ClientSession(loop=loop, auth=auth) as session:
+            results = [self._fetch_async(session, url) for url in urls]
+            return await asyncio.gather(*results)
+
+    async def _fetch_async(self, session, url):
+        async with session.get(url) as response:
+            return await response.json(), response.status
+
+
+def test():
+    c = AsyncGitHubAdapterMixin()
+    urls = ['https://jsonplaceholder.typicode.com/users', 'https://jsonplaceholder.typicode.com/posts/1']
+    return c.fetch_many_from_github(urls=urls)

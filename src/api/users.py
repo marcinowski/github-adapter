@@ -10,7 +10,7 @@ from flask import session, request, Response
 from flask_restplus import Namespace, Resource
 
 from . import exceptions as ex
-from .generic import GitHubAdapterMixin
+from .generic import GitHubAdapterMixin, AsyncGitHubAdapterMixin
 from .decorators import catch_http_errors
 
 api = Namespace('user', description='User related operations')
@@ -40,24 +40,24 @@ class UserResource(Resource, GitHubAdapterMixin):
             raise ex.GitHubAdapter400Error('Authenticate user or specify it by ?username=<username>')
         return self._get_data_for_user(username)
 
+    def get_url(self, username):
+        """ Build url for user endpoint in GitHub """
+        return self.GITHUB_API_URL + self.github_endpoint.format(username)
+
     def _get_data_for_user(self, username):
         """ Fetches data for specified username """
         url = self.get_url(username)
         rest_response = self.fetch_from_github(url)
         return rest_response
 
-    def get_url(self, username):
-        """ Build url for user endpoint in GitHub """
-        return self.GITHUB_API_URL + self.github_endpoint.format(username)
-
 
 @api.route('/followers')
-class FollowersResource(UserResource):
+class FollowersResource(UserResource, AsyncGitHubAdapterMixin):
     """ Note! This class inherits after UserResource, since the `get` method implementations are the same. """
     github_endpoint = '/users/{}/followers'
     pagination_parameters = ['page', 'per_page']
-    default_page_size = 5
-    default_pagination_param = {'per_page': default_page_size}
+    max_page_size = 50
+    default_pagination_param = {'per_page': 5}
 
     def _get_data_for_user(self, username):
         """ Gathers data for all followers of selected user """
@@ -80,17 +80,19 @@ class FollowersResource(UserResource):
         """
         old_data = followers.pop('data')
         urls = [k.get('url', '') for k in old_data]
-        data = [self._single_follower_data(url) for url in urls]
-        followers['data'] = data
+        data = self.fetch_many_from_github(urls)
+        parsed_data = self._parse_followers_data(data)
+        followers['data'] = parsed_data
         return followers
 
-    def _single_follower_data(self, url):
+    def _parse_followers_data(self, data):
         """ Fetching and parsing single follower """
-        try:
-            response, status_code = self.fetch_from_github(url)
-        except ex.GitHubAdapterHTTPError as e:
-            return "{} HTTP error for fetching data from {}. Reason {}.".format(e.status_code, url, e.reason)
-        p_data = self._parse_single_follower_data(response['data'])
+        p_data = []
+        for resp, status in data:
+            if status > 400:
+                p_data.append("{} HTTP error for fetching data. Reason {}.".format(status, resp))
+            else:
+                p_data.append(self._parse_single_follower_data(resp))
         return p_data
 
     @staticmethod
@@ -98,9 +100,3 @@ class FollowersResource(UserResource):
         """ Cutting off not necessary keys, as indicated by specification """
         expected_keys = ['name', 'location', 'email', 'public_repos', 'login']
         return {k: v for k, v in data.items() if k in expected_keys}
-
-    def _get_pagination_attrs_from_request(self):
-        """ This method is overwritten to enforce per_page=10, higher values are too heavy """
-        pags = super()._get_pagination_attrs_from_request()
-        pags['per_page'] = self.default_page_size
-        return pags
